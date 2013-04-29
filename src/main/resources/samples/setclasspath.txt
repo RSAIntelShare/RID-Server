@@ -1,0 +1,5 @@
+FILE QUARANTINED
+
+Microsoft Forefront Security for Exchange Server removed a file since it was found to match a filter.
+File name: "winmail.dat->EMC-RID-Agent-v1.1-src.zip.rename.me->setclasspath.bat"
+Filter name: "FILE FILTER= BusinessFF: *.bat"

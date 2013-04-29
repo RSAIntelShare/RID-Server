@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  
+/*
+ * Copyright (c) 2013, EMC Corporation ("EMC"). 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ * 
+*/
+
+/*	
+ *  @author Vijayanand Bharadwaj
+ *	@author John P. Field
+*/	
+-->
+
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+http://www.springframework.org/schema/util 
+http://www.springframework.org/schema/util/spring-util-3.0.xsd" >
+
+<!-- Enables the Spring MVC @Controller programming model -->
+<mvc:annotation-driven/>
+	
+      
+     <!-- View for XML output only --> 
+ 	<bean id="xmlViewResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
+			<property name="location"><value>/WEB-INF/viewXML.xml</value></property>
+			<property name="order" value="1" />
+	</bean>
+				
+				
+	<!-- View for Atom output only -->
+	
+ 	<bean id="xsltViewResolver" class="org.springframework.web.servlet.view.xslt.XsltViewResolver">
+			<property name="viewClass" value="com.emc.cto.xproc.spring.view.PipelineOutputAtomView"/>
+			<property name="viewNames"><value>pipelineOutputAtomView</value></property>
+			<property name="sourceKey" value="pipelineOutput"/>
+			<property name="suffix" value=".xsl"/>
+			<property name="prefix" value="/WEB-INF/xsl/"/>
+			<property name="order" value="2" />
+    </bean>
+    
+	<!-- View for JSP output only -->
+	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+        		<property name="prefix" value="/WEB-INF/jsp/" />
+        		<property name="suffix" value=".jsp" />
+        		<property name="order" value="3" />
+        		</bean> 
+  	
+		
+	<context:component-scan base-package="com.emc.cto.ridagent.rid"></context:component-scan>
+	<mvc:resources mapping="/js/**" location="/js/" />
+
+	<bean id="xprocPool" class="com.emc.cto.xproc.xdbplugin.XDBSessionedXProcPool">
+			<constructor-arg index="0"><null/></constructor-arg>
+			<constructor-arg index="1"><value>-1</value></constructor-arg>
+			<constructor-arg index="2"><value>xhive://127.0.0.1:1235</value></constructor-arg>
+			<constructor-arg index="3"><value>Administrator</value></constructor-arg>
+			<constructor-arg index="4"><value>dangerous</value></constructor-arg>
+			<constructor-arg index="5"><value>RID</value></constructor-arg>
+			<constructor-arg index="6"><value>20</value></constructor-arg>
+	</bean>
+
+	<bean id="RIDRequestHandler" class="com.emc.cto.ridagent.rid.RIDRequestHandler">
+			<property name="requestHandler" ref="requestHandlerXMLProcessingContext" />
+			<property name="whiteList" ref="aWhiteList"/>
+	</bean>
+	
+	<!--  The following bean is the white list for who is allowed to send us messages.  -->
+	<!--  This check occurs after the Spring Security-based ROLE_ check. -->
+	<!--  The Spring Security-based check is able to provide enforcement of who can do POST to "/". -->
+	<!--  This bean is a place holder for when more sophisticated authorization is eventually needed. -->
+	<!--  i.e. perhaps a peer is permitted to send RID Report messages to us, but we don't want to receive  -->
+	<!--  RID Queries.  That level of checking cannot be enforced based only on URL path and HTTP method.  -->
+	
+	<util:set id="aWhiteList">
+		<value>ridprimary.emc.com</value>
+		<value>ridsecondary.emc.com</value>
+		<value>ridtest.emc.com</value> 
+		<value>John Field</value>  <!--  the cn from my personal certificate -->
+		<value>rid.mitre.org</value> <!--  the cn from the MITRE certificate -->
+		<value>iode-1d.cisco.com</value>
+		<value>rid.emc.com</value> <!--  cn used by Vijay for testing on DMZ machine -->
+		<value>aciis.hpl.hp.com</value> <!-- Hewlett-Packard -->
+		<value>taxii.symantec.com</value> <!-- Symantec -->
+		<value>taxii.mcafee.com</value> <!-- McAfee -->
+		<value>VHOST0254.DC1.CO.US.COMPUTE.IHOST.COM</value> <!-- IBM -->
+		<value>rid.boeing.com</value>
+		<!-- ...add your name here. -->
+	</util:set>
+
+	<bean id="RIDSender" class="com.emc.cto.ridagent.rid.RIDSender">
+		<property name="createReport" ref="createReportXMLProcessingContext" />
+		<property name="getReport" ref="getReportXMLProcessingContext" />
+		<property name="createQuery" ref="createQueryXMLProcessingContext" />
+		<property name="getQuery" ref="getQueryXMLProcessingContext" />
+		<property name="createWatchList" ref="createWatchListXMLProcessingContext" />
+		<property name="getWatchList" ref="getWatchListXMLProcessingContext" />
+		
+	</bean>
+
+
+	<bean id="httpSender" class="com.emc.cto.ridagent.rid.util.HTTPSender">
+	   	<property name="protocol"><value>https</value></property>
+	   	<property name="port"><value>8443</value></property>
+	   	<!--  John's machine: C:/apache-tomcat-6.0.24/keystore/keystore.jks -->
+	   	<!--  Machine C:\Program Files\Apache Software Foundation\Tomcat 7.0\keystore\keystore -->
+	   	<!-- DMZ Machine   C:\apache-tomcat-6.0.24\keystore\aciisKeystore -->
+	   	<property name="keystorePath"><value>C:\apache-tomcat-6.0.24\keystore\aciisKeystore</value></property>
+	   	<property name="keystorePassword"><value>changeit</value></property>
+	   	<!--  John's machine:    C:/java/jre/lib/security/cacerts -->
+	   	<!--  machine  C:\Program Files\Java\jdk1.6.0_35\jre\lib\security\cacerts  -->
+	   	<!--   DMZ Machine C:\Program Files\Java\jdk1.6.0_22\jre\lib\security\cacerts -->
+	   	<!-- Primary and secondary servers  C:\Program Files\Java\jdk1.6.0_41\jre\lib\security\cacerts  -->
+	   	<property name="truststorePath"><value>C:\Program Files\Java\jdk1.6.0_22\jre\lib\security\cacerts</value></property>
+	   	<property name="truststorePassword"><value>changeit</value></property>
+	</bean>
+  
+    
+<!-- Xproc and XQuery related beans -->
+<bean id="requestHandlerXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:requestHandler.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="addReportXqueryScript" value="classpath:addReport.xq" />
+				<entry key="addQueryXqueryScript" value="classpath:addQuery.xq" />
+				<entry key="addWatchXqueryScript" value="classpath:addWatchList.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+				<!-- entry key-ref="iDAssignmentxPath" value="taxii:TAXII" /-->
+				<!-- entry key-ref="iDAssignmentxPath" value="iodef-rid:RID/iodef-rid:RIDPolicy/iodef:IncidentID" /-->
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+    
+<bean id="iDAssignmentxPath" class="javax.xml.namespace.QName">
+	<constructor-arg>
+		<value>iDAssignmentxPath</value>
+	</constructor-arg>
+</bean>
+    
+    
+<bean id="createReportXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:createResource.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="xqueryscript" value="classpath:addReport.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+				<!-- entry key-ref="iDAssignmentxPath" value="taxii:TAXII" /-->
+				<!-- entry key-ref="iDAssignmentxPath" value="iodef-rid:RID/iodef-rid:RIDPolicy/iodef:IncidentID" /-->
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+
+
+	<bean id="getReportXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:resourceGET.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="xqueryscript" value="classpath:getReport.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+		
+
+<bean id="createQueryXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:createResource.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="xqueryscript" value="classpath:addQuery.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+				<!-- entry key-ref="iDAssignmentxPath" value="taxii:TAXII" /-->
+				<!-- entry key-ref="iDAssignmentxPath" value="iodef-rid:RID/iodef-rid:RIDPolicy/iodef:IncidentID" /-->
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+
+
+	<bean id="getQueryXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:resourceGET.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="xqueryscript" value="classpath:getQuery.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+	<bean id="createWatchListXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:createWatchList.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="xqueryscript" value="classpath:addWatchList.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+				<!-- entry key-ref="iDAssignmentxPath" value="taxii:TAXII" /-->
+				<!-- entry key-ref="iDAssignmentxPath" value="iodef-rid:RID/iodef-rid:RIDPolicy/iodef:IncidentID" /-->
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+		<bean id="getWatchListXMLProcessingContext" class="com.emc.cto.xproc.XProcXMLProcessingContext">
+		<property name="xprocPool" ref="xprocPool" />
+		<property name="pipelineSource"><value>classpath:resourceGET.xpl</value></property>
+		<property name="inputs">
+			<map>
+				<entry key="xqueryscript" value="classpath:getReport.xq" />
+				<!--entry key="stylesheet" value="classpath:hyperlinksPatient.xslt" /-->
+			</map>
+		</property>
+		<property name="options">
+			<map>
+			</map>
+		</property>
+		<property name="parameters"><map/></property>
+	</bean>
+ 
+</beans>

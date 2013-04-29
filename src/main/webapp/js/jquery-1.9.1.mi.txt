@@ -1,0 +1,5 @@
+FILE QUARANTINED
+
+Microsoft Forefront Security for Exchange Server removed a file since it was found to match a filter.
+File name: "ACIIS_Code_4.24.2013.zip->jquery-1.9.1.min.js"
+Filter name: "FILE FILTER= BusinessFF: *.js"
