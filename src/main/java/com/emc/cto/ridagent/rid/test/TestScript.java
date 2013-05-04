@@ -253,7 +253,7 @@ public class TestScript {
 		HttpGet httpget = new HttpGet("http://localhost:1280/federation/RID/"+id+"/report.xml");
 
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		Credentials defaultcreds = new UsernamePasswordCredentials("Administrator", "dangerous");
+		Credentials defaultcreds = new UsernamePasswordCredentials("Administrator", "secret");
 		httpclient.getCredentialsProvider().setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT), defaultcreds);
 		httpget.setHeader("User-Agent","EMC RID System");
 

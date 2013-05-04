@@ -57,14 +57,6 @@
 				<sec:user name="ridprimary.emc.com" authorities="ROLE_RID_SENDER" />
 				<sec:user name="ridtest.emc.com" authorities="ROLE_RID_SENDER" />
 				<sec:user name="John Field" authorities="ROLE_RID_SENDER" />
-				<sec:user name="iode-1d.cisco.com" authorities="ROLE_RID_SENDER" />
-				<sec:user name="rid.mitre.org" authorities="ROLE_RID_SENDER" />
-				<sec:user name="rid.emc.com" authorities="ROLE_RID_SENDER" />
-				<sec:user name="aciis.hpl.hp.com" authorities="ROLE_RID_SENDER" />
-				<sec:user name="taxii.symantec.com" authorities="ROLE_RID_SENDER" />
-				<sec:user name="taxii.mcafee.com" authorities="ROLE_RID_SENDER" />
-				<sec:user name="VHOST0254.DC1.CO.US.COMPUTE.IHOST.COM" authorities="ROLE_RID_SENDER" />
-				<sec:user name="rid.boeing.com" authorities="ROLE_RID_SENDER" />
 			</sec:user-service>
 		</sec:authentication-provider>
 	</sec:authentication-manager>

@@ -27,7 +27,7 @@
 <head>
 <script type="text/javascript" src="/js/jquery-1.9.1.min.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Malware</title>
+<title>DDOS Form</title>
 </head>
 <body>
 <script type="text/javascript">
@@ -74,8 +74,8 @@ $(document).ready(function() {
 		var Position=Number($(this).attr("id"));	
 		var IPPosition=Number($(this).attr("data-row"));
 		//alert(Position);
-    		var appendTxt="Protocol:<select name=\"Node["+index+"].address["+ Position +"].system["+IPPosition+"].protocolno\"> <option value=\"6\">TCP</option> <option value=\"17\">UDP</option></select>";
-    		appendTxt =appendTxt+"Port:<input id=\"Node"+ index + ".address" + Position + ".system"+ IPPosition +".portno\" name=\"Node["+ index +"].address[" + Position + "].system["+IPPosition+"].portno\" size=\"40\" />";
+    		var appendTxt="Protocol*:<select name=\"Node["+index+"].address["+ Position +"].system["+IPPosition+"].protocolno\"> <option value=\"6\">TCP</option> <option value=\"17\">UDP</option></select>";
+    		appendTxt =appendTxt+"Port*:<input id=\"Node"+ index + ".address" + Position + ".system"+ IPPosition +".portno\" name=\"Node["+ index +"].address[" + Position + "].system["+IPPosition+"].portno\" size=\"40\" />";
     		appendTxt =appendTxt+"UserAgent:<input id=\"Node"+ index + ".address" + Position + ".system"+ IPPosition +".useragent\" name=\"Node["+ index +"].address[" + Position + "].system["+IPPosition+"].useragent\" size=\"40\" />";
     		//alert(appendTxt);
 			$(this).before(appendTxt);
@@ -105,25 +105,25 @@ $(document).ready(function() {
 			<td>&nbsp;&nbsp;<b>DDOS Information Sharing</b></td>
 		</tr>
 		<tr>
-				<td>Description<spring:bind path="description">
+				<td>Description*<spring:bind path="description">
 				<form:textarea path="${status.expression}" rows="5" cols="40"/>
 	  			</spring:bind>
 	  		</td>
 		</tr>
 				<tr>
-				<td>ReportTime{YY:MM:DD:HH:MI:SE}<spring:bind path="reporttime">
+				<td>ReportTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="reporttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 		<tr>
-				<td>StartTime{YY:MM:DD:HH:MI:SE}<spring:bind path="starttime">
+				<td>StartTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="starttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 				<tr>
-				<td>DetectTime{YY:MM:DD:HH:MI:SE}<spring:bind path="detecttime">
+				<td>DetectTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="detecttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
@@ -153,7 +153,7 @@ $(document).ready(function() {
 	  		</td>
 		</tr>
 		<tr>
-			<td>System Information</td>
+			<td>System Information*</td>
 		</tr>
 		<tr>
 			<td>

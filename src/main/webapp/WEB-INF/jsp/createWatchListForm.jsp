@@ -27,7 +27,7 @@
 <head>
 <script type="text/javascript" src="/js/jquery-1.9.1.min.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Malware</title>
+<title>WatchList Form</title>
 </head>
 <body>
 <script type="text/javascript">
@@ -154,19 +154,19 @@ $(document).ready(function() {
 			<td>&nbsp;&nbsp;<b>WatchList Indicator(s) Sharing</b></td>
 		</tr>
 		<tr>
-				<td>Description<spring:bind path="description">
+				<td>Description*<spring:bind path="description">
 				<form:textarea path="${status.expression}" rows="5" cols="40"/>
 	  			</spring:bind>
 	  		</td>
 		</tr>
 				<tr>
-				<td>ReportTime{YY:MM:DD:HH:MI:SE}<spring:bind path="reporttime">
+				<td>ReportTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="reporttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 		<tr>
-			<td>Malicious Node(s)</td>
+			<td>Malicious Node(s)*</td>
 		</tr>
 		<tr>
 			<td>
@@ -212,7 +212,7 @@ $(document).ready(function() {
 			<td><input type="button" id="add" class="addIP" value="Add Node"/> </td>
 		</tr>
 		<tr>
-			<td>Malware Hashe(s)</td>
+			<td>Malware Hashe(s)*</td>
 		</tr>
 		<tr>
 			<td>
@@ -237,7 +237,7 @@ $(document).ready(function() {
 		</tr>
 		<tr>
 		<td>
-		 Registry Key Value Pair(s)
+		 Registry Key Value Pair(s)*
 		</td>
 		</tr>
 		<tr>

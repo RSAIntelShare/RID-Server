@@ -546,230 +546,234 @@ public class RIDSender {
 				JAXBElement element = (JAXBElement) u.unmarshal(node);
 				RIDType d= (RIDType)element.getValue();
 				RIDPolicyType policy=d.getRIDPolicy();
-				ReportSchemaType rst=policy.getReportSchema();
-				ExtensionType et=rst.getXMLDocument();
-				IODEFDocument document=(IODEFDocument)et.getContent().get(0);
-				Incident incident=document.getIncident().get(0);
-				if(incident.getDescription().size()!=0){
-					MLStringType des=incident.getDescription().get(0);
-					eventdata.setDescription(des.getValue());
-				}
-				if(incident.getReportTime()!=null)
-					eventdata.setReporttime(incident.getReportTime().toString());
-				if(incident.getStartTime()!=null)
-					eventdata.setStarttime(incident.getStartTime().toString());
-				if(incident.getEndTime()!=null)
-					eventdata.setStoptime(incident.getEndTime().toString());
-				if(incident.getDetectTime()!=null)
-					eventdata.setDetecttime(incident.getDetectTime().toString());
-				for (int eventCount=0;eventCount<incident.getEventData().size();eventCount++){
-					EventData one=incident.getEventData().get(eventCount);
-					Event nodeobj= new Event();		    	        
-					eventdata.getNode().add(nodeobj);
-					if(one.getMethod().size()!=0){
-						Method methodobj=one.getMethod().get(0);
-						Reference ref=(Reference)methodobj.getReferenceOrDescription().get(0);
-						nodeobj.setRefName(ref.getReferenceName().getValue());
-						nodeobj.setRefURL(ref.getURL().get(0));
-
-
-					}
-					boolean domainPresent=false;
-					for(int flowindex=0;flowindex<one.getFlow().size();flowindex++){
-						Flow flowobject=one.getFlow().get(flowindex);
-						if(flowobject.getSystem().size()>0){
-							com.emc.cto.ridagent.rid.jaxb.System sysobject=flowobject.getSystem().get(0);
-							com.emc.cto.ridagent.rid.jaxb.Node nodes=sysobject.getNode().get(0);
-							for(int addressindex=0;addressindex<nodes.getNodeNameOrDomainDataOrAddress().size();addressindex++){
-								Object obj=nodes.getNodeNameOrDomainDataOrAddress().get(addressindex);
-								if(obj instanceof DomainData ){
-									domainPresent=true;
-									break;
-								}
-							}
-
+				if(policy.getReportSchema()!=null){
+					ReportSchemaType rst=policy.getReportSchema();
+					if(rst.getXMLDocument()!=null){
+						ExtensionType et=rst.getXMLDocument();
+						IODEFDocument document=(IODEFDocument)et.getContent().get(0);
+						Incident incident=document.getIncident().get(0);
+						if(incident.getDescription().size()!=0){
+							MLStringType des=incident.getDescription().get(0);
+							eventdata.setDescription(des.getValue());
 						}
+						if(incident.getReportTime()!=null)
+							eventdata.setReporttime(incident.getReportTime().toString());
+						if(incident.getStartTime()!=null)
+							eventdata.setStarttime(incident.getStartTime().toString());
+						if(incident.getEndTime()!=null)
+							eventdata.setStoptime(incident.getEndTime().toString());
+						if(incident.getDetectTime()!=null)
+							eventdata.setDetecttime(incident.getDetectTime().toString());
+						for (int eventCount=0;eventCount<incident.getEventData().size();eventCount++){
+							EventData one=incident.getEventData().get(eventCount);
+							Event nodeobj= new Event();		    	        
+							eventdata.getNode().add(nodeobj);
+							if(one.getMethod().size()!=0){
+								Method methodobj=one.getMethod().get(0);
+								Reference ref=(Reference)methodobj.getReferenceOrDescription().get(0);
+								nodeobj.setRefName(ref.getReferenceName().getValue());
+								nodeobj.setRefURL(ref.getURL().get(0));
 
-						if(domainPresent){  //domaindata in flow element
-							Flow flowobj=one.getFlow().get(flowindex);
-							for(int systemindex=0;systemindex<flowobj.getSystem().size();systemindex++){
-								com.emc.cto.ridagent.rid.jaxb.System sysobj=flowobj.getSystem().get(systemindex);
-								PhishingData ip=new PhishingData();
-								nodeobj.getPhishing().add(ip);
-								ip.setSystemcategory(sysobj.getCategory());
-								com.emc.cto.ridagent.rid.jaxb.Node nodes=sysobj.getNode().get(0);  //get the first node
-								for(int addressindex=0;addressindex<nodes.getNodeNameOrDomainDataOrAddress().size();addressindex++){
-									Object obj=nodes.getNodeNameOrDomainDataOrAddress().get(addressindex);
-									if(obj instanceof Address){
-										SystemData address=new SystemData();
-										ip.getSystem().add(address);
-										Address addressobj=(Address)obj;
-										address.setType(addressobj.getCategory());
-										address.setValue(addressobj.getValue());		    	        				
-									}
-									else if (obj instanceof MLStringType){
-										SystemData address=new SystemData();
-										ip.getSystem().add(address);
-										MLStringType nodename=(MLStringType)obj;
-										address.setType("Name");
-										address.setValue(nodename.getValue());
-
-									}
-									else if(obj instanceof DomainData ){
-										EmailInfo emailobj=new EmailInfo();
-										ip.getEmailinfo().add(emailobj);
-										DomainData domainobj=(DomainData)obj;
-										emailobj.setDomain(domainobj.getName().getValue());
-										emailobj.setDomaindate(domainobj.getDateDomainWasChecked().toString());
-										for(int dnsindex=0;dnsindex<domainobj.getRelatedDNS().size();dnsindex++){
-											RelatedDNSEntryType dnsobj=domainobj.getRelatedDNS().get(dnsindex);
-											DNSRecord dnsrecordobj=new DNSRecord();
-											emailobj.getDns().add(dnsrecordobj);
-											dnsrecordobj.setType(dnsobj.getRecordType());
-											dnsrecordobj.setValue(dnsobj.getValue());	
-
-										}									
-									}
-
-								}
-								for(int serviceindex=0;serviceindex<sysobj.getService().size();serviceindex++){
-									Service serviceobj=sysobj.getService().get(serviceindex);
-									if(serviceobj.getEmailInfo()!=null){
-										EmailInfo emailinfoobj=ip.getEmailinfo().get(serviceindex);
-										emailinfoobj.setEmailid(serviceobj.getEmailInfo().getEmail().getValue());
-										emailinfoobj.setSubject(serviceobj.getEmailInfo().getEmailSubject().getValue());
-										emailinfoobj.setMailerid(serviceobj.getEmailInfo().getXMailer().getValue());
-
-									}
-									else{
-										SystemData address=ip.getSystem().get(serviceindex);
-										address.setProtocolno(address.getProtocolno());
-										address.setPortno(address.getPortno());
-										if(serviceobj.getApplication()!=null){
-											SoftwareType useragent=serviceobj.getApplication();
-											address.setUseragent(useragent.getUserAgent());
-										}	
-									}
-
-								}
-								NodeRole noderole=nodes.getNodeRole().get(0); //get the only node role
-								ip.setCategory(noderole.getCategory());
-								if(noderole.getAttacktype()!=null)
-									ip.setRole(noderole.getAttacktype().name());
 
 							}
+							boolean domainPresent=false;
+							for(int flowindex=0;flowindex<one.getFlow().size();flowindex++){
+								Flow flowobject=one.getFlow().get(flowindex);
+								if(flowobject.getSystem().size()>0){
+									com.emc.cto.ridagent.rid.jaxb.System sysobject=flowobject.getSystem().get(0);
+									com.emc.cto.ridagent.rid.jaxb.Node nodes=sysobject.getNode().get(0);
+									for(int addressindex=0;addressindex<nodes.getNodeNameOrDomainDataOrAddress().size();addressindex++){
+										Object obj=nodes.getNodeNameOrDomainDataOrAddress().get(addressindex);
+										if(obj instanceof DomainData ){
+											domainPresent=true;
+											break;
+										}
+									}
 
-						}
-						else{
-							Flow flowobj=one.getFlow().get(flowindex);
-							for(int systemindex=0;systemindex<flowobj.getSystem().size();systemindex++){
-								com.emc.cto.ridagent.rid.jaxb.System sysobj=flowobj.getSystem().get(systemindex);
-								NetworkInfo ip=new NetworkInfo();
-								nodeobj.getAddress().add(ip);
-								ip.setSystemcategory(sysobj.getCategory());
-								for (int nodeindex=0;nodeindex<sysobj.getNode().size();nodeindex++){
-									com.emc.cto.ridagent.rid.jaxb.Node nodes=sysobj.getNode().get(nodeindex);
-									if(nodes.getNodeRole().size()!=0){
+								}
+
+								if(domainPresent){  //domaindata in flow element
+									Flow flowobj=one.getFlow().get(flowindex);
+									for(int systemindex=0;systemindex<flowobj.getSystem().size();systemindex++){
+										com.emc.cto.ridagent.rid.jaxb.System sysobj=flowobj.getSystem().get(systemindex);
+										PhishingData ip=new PhishingData();
+										nodeobj.getPhishing().add(ip);
+										ip.setSystemcategory(sysobj.getCategory());
+										com.emc.cto.ridagent.rid.jaxb.Node nodes=sysobj.getNode().get(0);  //get the first node
+										for(int addressindex=0;addressindex<nodes.getNodeNameOrDomainDataOrAddress().size();addressindex++){
+											Object obj=nodes.getNodeNameOrDomainDataOrAddress().get(addressindex);
+											if(obj instanceof Address){
+												SystemData address=new SystemData();
+												ip.getSystem().add(address);
+												Address addressobj=(Address)obj;
+												address.setType(addressobj.getCategory());
+												address.setValue(addressobj.getValue());		    	        				
+											}
+											else if (obj instanceof MLStringType){
+												SystemData address=new SystemData();
+												ip.getSystem().add(address);
+												MLStringType nodename=(MLStringType)obj;
+												address.setType("Name");
+												address.setValue(nodename.getValue());
+
+											}
+											else if(obj instanceof DomainData ){
+												EmailInfo emailobj=new EmailInfo();
+												ip.getEmailinfo().add(emailobj);
+												DomainData domainobj=(DomainData)obj;
+												emailobj.setDomain(domainobj.getName().getValue());
+												emailobj.setDomaindate(domainobj.getDateDomainWasChecked().toString());
+												for(int dnsindex=0;dnsindex<domainobj.getRelatedDNS().size();dnsindex++){
+													RelatedDNSEntryType dnsobj=domainobj.getRelatedDNS().get(dnsindex);
+													DNSRecord dnsrecordobj=new DNSRecord();
+													emailobj.getDns().add(dnsrecordobj);
+													dnsrecordobj.setType(dnsobj.getRecordType());
+													dnsrecordobj.setValue(dnsobj.getValue());	
+
+												}									
+											}
+
+										}
+										for(int serviceindex=0;serviceindex<sysobj.getService().size();serviceindex++){
+											Service serviceobj=sysobj.getService().get(serviceindex);
+											if(serviceobj.getEmailInfo()!=null){
+												EmailInfo emailinfoobj=ip.getEmailinfo().get(serviceindex);
+												emailinfoobj.setEmailid(serviceobj.getEmailInfo().getEmail().getValue());
+												emailinfoobj.setSubject(serviceobj.getEmailInfo().getEmailSubject().getValue());
+												emailinfoobj.setMailerid(serviceobj.getEmailInfo().getXMailer().getValue());
+
+											}
+											else{
+												SystemData address=ip.getSystem().get(serviceindex);
+												address.setProtocolno(address.getProtocolno());
+												address.setPortno(address.getPortno());
+												if(serviceobj.getApplication()!=null){
+													SoftwareType useragent=serviceobj.getApplication();
+													address.setUseragent(useragent.getUserAgent());
+												}	
+											}
+
+										}
 										NodeRole noderole=nodes.getNodeRole().get(0); //get the only node role
 										ip.setCategory(noderole.getCategory());
 										if(noderole.getAttacktype()!=null)
 											ip.setRole(noderole.getAttacktype().name());
-									}
-									for(int addressindex=0;addressindex<nodes.getNodeNameOrDomainDataOrAddress().size();addressindex++){
-										SystemData address=new SystemData();
-										ip.getSystem().add(address);
-										Object obj=nodes.getNodeNameOrDomainDataOrAddress().get(addressindex);
-										if(obj instanceof Address){
-											Address addressobj=(Address)obj;
-											address.setType(addressobj.getCategory());
-											address.setValue(addressobj.getValue());		    	        				
-										}
-										else if (obj instanceof MLStringType){
-											MLStringType nodename=(MLStringType)obj;
-											address.setType("Name");
-											address.setValue(nodename.getValue());
-
-										}
 
 									}
-								}
-								for(int serviceindex=0;serviceindex<sysobj.getService().size();serviceindex++){
-									Service serviceobj=sysobj.getService().get(serviceindex);
-									SystemData address=ip.getSystem().get(serviceindex);
-									address.setProtocolno(serviceobj.getIpProtocol());
-									address.setPortno(serviceobj.getPort());
-									if(serviceobj.getApplication()!=null){
-										SoftwareType useragent=serviceobj.getApplication();
-										address.setUseragent(useragent.getUserAgent());
-									}							
-
-								}
-
-							}
-						}
-
-					}
-					Record recordobj=one.getRecord();
-					if(recordobj!=null){
-						for(int recorddataindex=0;recorddataindex<recordobj.getRecordData().size();recorddataindex++){
-							RecordData recorddataobj=recordobj.getRecordData().get(recorddataindex);
-							for(int hashindex=0;hashindex<recorddataobj.getHashInformation().size();hashindex++){
-								HashSigDetails hashobj=recorddataobj.getHashInformation().get(hashindex);
-								if(hashobj.getSignature().size()!=0){
-									DigitalSig signatureobj=new DigitalSig();
-									nodeobj.getDsig().add(signatureobj);
-									signatureobj.setType(hashobj.getType());
-									signatureobj.setValidity(hashobj.isValid().toString());
-									SignatureType signature=hashobj.getSignature().get(0);  //get the signature
-									SignedInfoType signedinfo= signature.getSignedInfo();
-									signatureobj.setCan_method(signedinfo.getCanonicalizationMethod().getAlgorithm());
-									signatureobj.setSignature_method(signedinfo.getSignatureMethod().getAlgorithm());
-									ReferenceType reference=signedinfo.getReference().get(0);
-									signatureobj.setHash_type(reference.getDigestMethod().getAlgorithm());
-									signatureobj.setHash_value(reference.getDigestValue());
-									signatureobj.setSignature_value(signature.getSignatureValue().getValue());									
 
 								}
 								else{
-									Hash hash=new Hash();
-									nodeobj.getHash().add(hash);
-									hash.setType(hashobj.getType());
-									for(int fileindex=0;fileindex<hashobj.getFileName().size();fileindex++){
-										MLStringType fileinfo=hashobj.getFileName().get(fileindex);
-										FileData filedataobj=new FileData();
-										hash.getFile().add(filedataobj);
-										filedataobj.setFilename(fileinfo.getValue());
-									}
+									Flow flowobj=one.getFlow().get(flowindex);
+									for(int systemindex=0;systemindex<flowobj.getSystem().size();systemindex++){
+										com.emc.cto.ridagent.rid.jaxb.System sysobj=flowobj.getSystem().get(systemindex);
+										NetworkInfo ip=new NetworkInfo();
+										nodeobj.getAddress().add(ip);
+										ip.setSystemcategory(sysobj.getCategory());
+										for (int nodeindex=0;nodeindex<sysobj.getNode().size();nodeindex++){
+											com.emc.cto.ridagent.rid.jaxb.Node nodes=sysobj.getNode().get(nodeindex);
+											if(nodes.getNodeRole().size()!=0){
+												NodeRole noderole=nodes.getNodeRole().get(0); //get the only node role
+												ip.setCategory(noderole.getCategory());
+												if(noderole.getAttacktype()!=null)
+													ip.setRole(noderole.getAttacktype().name());
+											}
+											for(int addressindex=0;addressindex<nodes.getNodeNameOrDomainDataOrAddress().size();addressindex++){
+												SystemData address=new SystemData();
+												ip.getSystem().add(address);
+												Object obj=nodes.getNodeNameOrDomainDataOrAddress().get(addressindex);
+												if(obj instanceof Address){
+													Address addressobj=(Address)obj;
+													address.setType(addressobj.getCategory());
+													address.setValue(addressobj.getValue());		    	        				
+												}
+												else if (obj instanceof MLStringType){
+													MLStringType nodename=(MLStringType)obj;
+													address.setType("Name");
+													address.setValue(nodename.getValue());
 
-									for(int anotherhashindex=0;anotherhashindex<hashobj.getReference().size();anotherhashindex++){
-										ReferenceType referenceobj=hashobj.getReference().get(anotherhashindex);
-										HashData hashvalueobj=new HashData();
-										hash.getValue().add(hashvalueobj);
-										DigestMethodType digestobj=referenceobj.getDigestMethod();
-										hashvalueobj.setHash_type(digestobj.getAlgorithm());
-										hashvalueobj.setValue(referenceobj.getDigestValue());									
+												}
+
+											}
+										}
+										for(int serviceindex=0;serviceindex<sysobj.getService().size();serviceindex++){
+											Service serviceobj=sysobj.getService().get(serviceindex);
+											SystemData address=ip.getSystem().get(serviceindex);
+											address.setProtocolno(serviceobj.getIpProtocol());
+											address.setPortno(serviceobj.getPort());
+											if(serviceobj.getApplication()!=null){
+												SoftwareType useragent=serviceobj.getApplication();
+												address.setUseragent(useragent.getUserAgent());
+											}							
+
+										}
+
 									}
 								}
 
+							}
+							Record recordobj=one.getRecord();
+							if(recordobj!=null){
+								for(int recorddataindex=0;recorddataindex<recordobj.getRecordData().size();recorddataindex++){
+									RecordData recorddataobj=recordobj.getRecordData().get(recorddataindex);
+									for(int hashindex=0;hashindex<recorddataobj.getHashInformation().size();hashindex++){
+										HashSigDetails hashobj=recorddataobj.getHashInformation().get(hashindex);
+										if(hashobj.getSignature().size()!=0){
+											DigitalSig signatureobj=new DigitalSig();
+											nodeobj.getDsig().add(signatureobj);
+											signatureobj.setType(hashobj.getType());
+											signatureobj.setValidity(hashobj.isValid().toString());
+											SignatureType signature=hashobj.getSignature().get(0);  //get the signature
+											SignedInfoType signedinfo= signature.getSignedInfo();
+											signatureobj.setCan_method(signedinfo.getCanonicalizationMethod().getAlgorithm());
+											signatureobj.setSignature_method(signedinfo.getSignatureMethod().getAlgorithm());
+											ReferenceType reference=signedinfo.getReference().get(0);
+											signatureobj.setHash_type(reference.getDigestMethod().getAlgorithm());
+											signatureobj.setHash_value(reference.getDigestValue());
+											signatureobj.setSignature_value(signature.getSignatureValue().getValue());									
+
+										}
+										else{
+											Hash hash=new Hash();
+											nodeobj.getHash().add(hash);
+											hash.setType(hashobj.getType());
+											for(int fileindex=0;fileindex<hashobj.getFileName().size();fileindex++){
+												MLStringType fileinfo=hashobj.getFileName().get(fileindex);
+												FileData filedataobj=new FileData();
+												hash.getFile().add(filedataobj);
+												filedataobj.setFilename(fileinfo.getValue());
+											}
+
+											for(int anotherhashindex=0;anotherhashindex<hashobj.getReference().size();anotherhashindex++){
+												ReferenceType referenceobj=hashobj.getReference().get(anotherhashindex);
+												HashData hashvalueobj=new HashData();
+												hash.getValue().add(hashvalueobj);
+												DigestMethodType digestobj=referenceobj.getDigestMethod();
+												hashvalueobj.setHash_type(digestobj.getAlgorithm());
+												hashvalueobj.setValue(referenceobj.getDigestValue());									
+											}
+										}
+
+
+									}
+									for(int registryindex=0;registryindex<recorddataobj.getWindowsRegistryKeysModified().size();registryindex++){
+										RegistryKeyModified rkmobj=recorddataobj.getWindowsRegistryKeysModified().get(registryindex);
+										for(int keyindex=0;keyindex<rkmobj.getKey().size();keyindex++){
+											Key key=rkmobj.getKey().get(keyindex);
+											RegistryValues registryvaluesobj=new RegistryValues();
+											nodeobj.getRegistry().add(registryvaluesobj);
+											registryvaluesobj.setAction(key.getRegistryaction());
+											registryvaluesobj.setKey(key.getKeyName());
+											registryvaluesobj.setValue(key.getValue());
+
+										}							
+
+									}
+
+
+								}
 
 							}
-							for(int registryindex=0;registryindex<recorddataobj.getWindowsRegistryKeysModified().size();registryindex++){
-								RegistryKeyModified rkmobj=recorddataobj.getWindowsRegistryKeysModified().get(registryindex);
-								for(int keyindex=0;keyindex<rkmobj.getKey().size();keyindex++){
-									Key key=rkmobj.getKey().get(keyindex);
-									RegistryValues registryvaluesobj=new RegistryValues();
-									nodeobj.getRegistry().add(registryvaluesobj);
-									registryvaluesobj.setAction(key.getRegistryaction());
-									registryvaluesobj.setKey(key.getKeyName());
-									registryvaluesobj.setValue(key.getValue());
-
-								}							
-
-							}
-
-
 						}
-
 					}
 				}
 

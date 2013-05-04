@@ -17,6 +17,10 @@
  -->
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<html>
+<head>
+    <title>RIDSystem - View Web View</title>
+</head>
 <body>
 	<h2>
 		<b>View Function</b>
@@ -151,3 +155,4 @@
 	<br>
 	<a href="${contextPath}/RIDSender">Home</a>
 </body>
+</html>

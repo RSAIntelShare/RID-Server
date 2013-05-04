@@ -26,7 +26,7 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <html>
-<head><title>EMC OCTO RID System (TAXII)</title></head>
+<head><title>EMC OCTO RID System</title></head>
 
 <body>
 

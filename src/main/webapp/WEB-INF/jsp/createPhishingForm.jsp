@@ -27,7 +27,7 @@
 <head>
 <script type="text/javascript" src="/js/jquery-1.9.1.min.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Malware</title>
+<title>Phishing Form</title>
 </head>
 <body>
 <script type="text/javascript">
@@ -250,40 +250,40 @@ $(document).ready(function() {
 <form:form method="post" action="${contextPath}/RIDSender/create/Phishing" name="classForm" id="classForm" commandName="classCommand">
 	<table id="0">
 		<tr>
-			<td>&nbsp;&nbsp;<b>SpearPhising Indicator(s) Sharing</b></td>
+			<td>&nbsp;&nbsp;<b>SpearPhishing Indicator(s) Sharing</b></td>
 		</tr>
 		<tr>
-				<td>Description<spring:bind path="description">
+				<td>Description*<spring:bind path="description">
 				<form:textarea path="${status.expression}" rows="5" cols="40"/>
 	  			</spring:bind>
 	  		</td>
 		</tr>
 		<tr>
-				<td>ReportTime{YY:MM:DD:HH:MI:SE}<spring:bind path="reporttime">
+				<td>ReportTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="reporttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 		<tr>
-				<td>StartTime{YY:MM:DD:HH:MI:SE}<spring:bind path="starttime">
+				<td>StartTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="starttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 		<tr>
-				<td>StopTime{YY:MM:DD:HH:MI:SE}<spring:bind path="stoptime">
+				<td>StopTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="stoptime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 				<tr>
-				<td>DetectTime{YY:MM:DD:HH:MI:SE}<spring:bind path="detecttime">
+				<td>DetectTime*{YY:MM:DD:HH:MI:SE}<spring:bind path="detecttime">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
 	  		</td>
 		</tr>
 		<tr>
-			<td>Malicious Node(s)</td>
+			<td>Malicious Node(s)*</td>
 		</tr>
 		<tr>
 			<td>
@@ -332,7 +332,7 @@ $(document).ready(function() {
 		</tr>
 		
 		<tr>
-			<td>Phishing Email Data Sharing</td>
+			<td>Phishing Email Data Sharing*</td>
 		</tr>
 		<tr>
 			<td>
@@ -385,7 +385,7 @@ $(document).ready(function() {
 			<td>Attachment Hashe(s)</td>
 		</tr>
 		<tr>
-		<td> File Name
+		<td> File Name*
 			   	<spring:bind path="Node[0].hash[0].file[0].filename">
 					<form:input path="${status.expression}" size="40" />
 	  			</spring:bind>
@@ -419,7 +419,7 @@ $(document).ready(function() {
 		</tr>
 		
 		<tr>
-			<td>Email Digital Signature(s)</td>
+			<td>Email Digital Signature(s)*</td>
 		</tr>
 		<tr>
 			<td>
